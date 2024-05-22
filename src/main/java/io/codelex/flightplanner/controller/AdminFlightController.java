@@ -2,6 +2,8 @@ package io.codelex.flightplanner.controller;
 
 import io.codelex.flightplanner.domain.Flight;
 import io.codelex.flightplanner.exception.DuplicateFlightException;
+import io.codelex.flightplanner.exception.SameAirportException;
+import io.codelex.flightplanner.exception.StrangeDatesException;
 import io.codelex.flightplanner.service.FlightService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +24,14 @@ public class AdminFlightController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping()
-    public Flight addFlight(@RequestBody Flight flight) throws DuplicateFlightException {
+    public Flight addFlight(@RequestBody Flight flight) {
         flight.setId(idAssigner.getAndIncrement());
         try {
             flightService.add(flight);
         } catch (DuplicateFlightException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
+        } catch (SameAirportException | StrangeDatesException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         return flight;
     }
