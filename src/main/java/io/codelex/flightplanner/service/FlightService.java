@@ -2,8 +2,8 @@ package io.codelex.flightplanner.service;
 
 import io.codelex.flightplanner.domain.Airport;
 import io.codelex.flightplanner.domain.Flight;
-import io.codelex.flightplanner.dto.response.SearchFlightResponse;
 import io.codelex.flightplanner.dto.request.SearchFlightsRequest;
+import io.codelex.flightplanner.dto.response.SearchFlightResponse;
 import io.codelex.flightplanner.exception.DuplicateFlightException;
 import io.codelex.flightplanner.exception.SameAirportException;
 import io.codelex.flightplanner.exception.StrangeDatesException;

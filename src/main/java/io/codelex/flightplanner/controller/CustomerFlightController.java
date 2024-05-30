@@ -2,8 +2,8 @@ package io.codelex.flightplanner.controller;
 
 import io.codelex.flightplanner.domain.Airport;
 import io.codelex.flightplanner.domain.Flight;
-import io.codelex.flightplanner.dto.response.SearchFlightResponse;
 import io.codelex.flightplanner.dto.request.SearchFlightsRequest;
+import io.codelex.flightplanner.dto.response.SearchFlightResponse;
 import io.codelex.flightplanner.exception.SameAirportException;
 import io.codelex.flightplanner.service.FlightService;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class CustomerFlightController {
-
     private final FlightService flightService;
 
     public CustomerFlightController(FlightService flightService) {
@@ -32,7 +31,7 @@ public class CustomerFlightController {
     public SearchFlightResponse searchFlights(@RequestBody SearchFlightsRequest searchFlightsRequest) {
         try {
             return flightService.searchFlights(searchFlightsRequest);
-        } catch (SameAirportException e) {
+        } catch (SameAirportException | NullPointerException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
@@ -44,6 +43,4 @@ public class CustomerFlightController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such flight on our list.");
         } else return flight;
     }
-
-
 }

@@ -38,7 +38,8 @@ public class FlightServiceImplementation implements FlightService {
     }
 
     public SearchFlightResponse searchFlights(SearchFlightsRequest searchFlightsRequest) throws SameAirportException {
-        validateAirports(searchFlightsRequest.getFrom(), searchFlightsRequest.getTo());
+        validateAirportRoute(searchFlightsRequest.getFrom(), searchFlightsRequest.getTo());
+        validateSearchFlightRequest(searchFlightsRequest);
         List<Flight> searchFlightsResponseContent = flightRepository.getAll().stream()
                 .filter(flight -> flight.getFrom().getAirport().equals(searchFlightsRequest.getFrom()))
                 .filter(flight -> flight.getTo().getAirport().equals(searchFlightsRequest.getTo()))
@@ -61,30 +62,46 @@ public class FlightServiceImplementation implements FlightService {
         return flightRepository.getAll();
     }
 
-    public void validateFlight(Flight flight) throws DuplicateFlightException, SameAirportException, StrangeDatesException {
+    private void validateFlight(Flight flight) throws DuplicateFlightException, SameAirportException, StrangeDatesException {
+        if (flight.getFrom() == null || flight.getTo() == null || flight.getCarrier() == null || flight.getCarrier().isEmpty() || flight.getDepartureTime() == null || flight.getArrivalTime() == null) {
+            throw new NullPointerException("Flight object cannot have null or empty fields.");
+        }
+
+        validateAirportRoute(flight.getFrom().getAirport(), flight.getTo().getAirport());
+
+        validateAirportValues(flight.getFrom(), flight.getTo());
+
         if (isDuplicateFlight(flight)) {
             throw new DuplicateFlightException("A flight like this already exists in our system.");
         }
-
-        validateAirports(flight.getFrom().getAirport(), flight.getTo().getAirport());
 
         if (flight.getDepartureTime().isAfter(flight.getArrivalTime()) || flight.getDepartureTime().equals(flight.getArrivalTime())) {
             throw new StrangeDatesException("Either departure or arrival are the same, or arrival date is before departure date.");
         }
     }
 
-    private void validateAirports(String from, String to) throws SameAirportException {
-        if (from.equalsIgnoreCase(to)) {
+    private void validateAirportRoute(String from, String to) throws SameAirportException {
+        if (from.toLowerCase().trim().equalsIgnoreCase(to.toLowerCase().trim())) {
             throw new SameAirportException("You cannot have a flight from and to the same airport.");
         }
+    }
 
+    private void validateAirportValues(Airport from, Airport to) {
+        if (from.getCountry() == null || from.getCity() == null || from.getAirport() == null || to.getCountry() == null || to.getCity() == null || to.getAirport() == null ||
+                from.getCountry().isEmpty() || from.getCity().isEmpty() || from.getAirport().isEmpty() || to.getCountry().isEmpty() || to.getCity().isEmpty() || to.getAirport().isEmpty()) {
+            throw new NullPointerException("Airport object cannot have null or empty fields.");
+        }
+    }
+
+    private void validateSearchFlightRequest(SearchFlightsRequest sfq) {
+        if (sfq.getFrom() == null || sfq.getTo() == null || sfq.getDepartureDate() == null || sfq.getFrom().isEmpty() || sfq.getTo().isEmpty()) {
+            throw new NullPointerException("Request cannot have null or empty values.");
+        }
     }
 
     private boolean isDuplicateFlight(Flight flight) {
         return flightRepository.getAll().stream()
                 .anyMatch(existingFlight -> existingFlight.equals(flight));
     }
-
-
 }
 

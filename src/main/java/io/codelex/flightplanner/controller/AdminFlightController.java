@@ -30,7 +30,7 @@ public class AdminFlightController {
             flightService.add(flight);
         } catch (DuplicateFlightException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
-        } catch (SameAirportException | StrangeDatesException e) {
+        } catch (SameAirportException | StrangeDatesException | NullPointerException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         return flight;
