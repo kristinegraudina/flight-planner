@@ -1,2 +1,6 @@
 node_modules
 .vs
+*.iml
+.idea
+.gradle
+build
