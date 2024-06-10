@@ -6,14 +6,14 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Flight {
-    int id;
-    Airport from;
-    Airport to;
-    String carrier;
+    private int id;
+    private Airport from;
+    private Airport to;
+    private String carrier;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    LocalDateTime departureTime;
+    private LocalDateTime departureTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    LocalDateTime arrivalTime;
+    private LocalDateTime arrivalTime;
 
     public Flight(int id, Airport from, Airport to, String carrier, @JsonFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime departureTime, @JsonFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime arrivalTime) {
         this.id = id;

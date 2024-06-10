@@ -3,9 +3,9 @@ package io.codelex.flightplanner.domain;
 import java.util.Objects;
 
 public class Airport {
-    String country;
-    String city;
-    String airport;
+    private String country;
+    private  String city;
+    private String airport;
 
     public Airport(String country, String city, String airport) {
         this.country = country;

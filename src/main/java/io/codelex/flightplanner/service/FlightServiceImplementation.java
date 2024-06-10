@@ -11,10 +11,13 @@ import io.codelex.flightplanner.repository.FlightRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class FlightServiceImplementation implements FlightService {
     private final FlightRepository flightRepository;
+
+    private final AtomicInteger idAssigner = new AtomicInteger(0);
 
     public FlightServiceImplementation(FlightRepository flightRepository) {
         this.flightRepository = flightRepository;
@@ -22,6 +25,7 @@ public class FlightServiceImplementation implements FlightService {
 
     public void add(Flight flight) throws DuplicateFlightException, SameAirportException, StrangeDatesException {
         validateFlight(flight);
+        flight.setId(idAssigner.getAndIncrement());
         flightRepository.add(flight);
     }
 
@@ -64,20 +68,18 @@ public class FlightServiceImplementation implements FlightService {
 
     private void validateFlight(Flight flight) throws DuplicateFlightException, SameAirportException, StrangeDatesException {
         if (flight.getFrom() == null || flight.getTo() == null || flight.getCarrier() == null || flight.getCarrier().isEmpty() || flight.getDepartureTime() == null || flight.getArrivalTime() == null) {
-            throw new NullPointerException("Flight object cannot have null or empty fields.");
+            throw new IllegalArgumentException("Flight object cannot have null or empty fields.");
         }
+
+        isDuplicateFlight(flight);
 
         validateAirportRoute(flight.getFrom().getAirport(), flight.getTo().getAirport());
 
         validateAirportValues(flight.getFrom(), flight.getTo());
 
-        if (isDuplicateFlight(flight)) {
-            throw new DuplicateFlightException("A flight like this already exists in our system.");
-        }
 
-        if (flight.getDepartureTime().isAfter(flight.getArrivalTime()) || flight.getDepartureTime().equals(flight.getArrivalTime())) {
-            throw new StrangeDatesException("Either departure or arrival are the same, or arrival date is before departure date.");
-        }
+        validateDates(flight);
+
     }
 
     private void validateAirportRoute(String from, String to) throws SameAirportException {
@@ -89,19 +91,26 @@ public class FlightServiceImplementation implements FlightService {
     private void validateAirportValues(Airport from, Airport to) {
         if (from.getCountry() == null || from.getCity() == null || from.getAirport() == null || to.getCountry() == null || to.getCity() == null || to.getAirport() == null ||
                 from.getCountry().isEmpty() || from.getCity().isEmpty() || from.getAirport().isEmpty() || to.getCountry().isEmpty() || to.getCity().isEmpty() || to.getAirport().isEmpty()) {
-            throw new NullPointerException("Airport object cannot have null or empty fields.");
+            throw new IllegalArgumentException("Airport object cannot have null or empty fields.");
         }
     }
 
     private void validateSearchFlightRequest(SearchFlightsRequest sfq) {
         if (sfq.getFrom() == null || sfq.getTo() == null || sfq.getDepartureDate() == null || sfq.getFrom().isEmpty() || sfq.getTo().isEmpty()) {
-            throw new NullPointerException("Request cannot have null or empty values.");
+            throw new IllegalArgumentException("Request cannot have null or empty values.");
         }
     }
 
-    private boolean isDuplicateFlight(Flight flight) {
-        return flightRepository.getAll().stream()
-                .anyMatch(existingFlight -> existingFlight.equals(flight));
+    public void validateDates(Flight flight) throws StrangeDatesException {
+        if (flight.getDepartureTime().isAfter(flight.getArrivalTime()) || flight.getDepartureTime().equals(flight.getArrivalTime())) {
+            throw new StrangeDatesException("Either departure or arrival are the same, or arrival date is before departure date.");
+        }
+    }
+
+    private void isDuplicateFlight(Flight flight) throws DuplicateFlightException {
+        if (flightRepository.getAll().stream().anyMatch(existingFlight -> existingFlight.equals(flight))) {
+            throw new DuplicateFlightException("A flight like this already exists in our system.");
+        }
     }
 }
 

@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequestMapping("/admin-api/flights")
 public class AdminFlightController {
     private final FlightService flightService;
-    private final AtomicInteger idAssigner = new AtomicInteger(0);
 
     public AdminFlightController(FlightService flightService) {
         this.flightService = flightService;
@@ -25,12 +24,11 @@ public class AdminFlightController {
     @ResponseStatus(HttpStatus.CREATED)
     @PutMapping()
     public Flight addFlight(@RequestBody Flight flight) {
-        flight.setId(idAssigner.getAndIncrement());
         try {
             flightService.add(flight);
         } catch (DuplicateFlightException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
-        } catch (SameAirportException | StrangeDatesException | NullPointerException e) {
+        } catch (SameAirportException | StrangeDatesException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         return flight;

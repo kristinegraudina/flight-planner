@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class SearchFlightsRequest {
-    String from;
-    String to;
-    LocalDate departureDate;
+    private String from;
+    private String to;
+    private LocalDate departureDate;
 
     public String getFrom() {
         return from;

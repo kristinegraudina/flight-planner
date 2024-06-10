@@ -31,7 +31,7 @@ public class CustomerFlightController {
     public SearchFlightResponse searchFlights(@RequestBody SearchFlightsRequest searchFlightsRequest) {
         try {
             return flightService.searchFlights(searchFlightsRequest);
-        } catch (SameAirportException | NullPointerException e) {
+        } catch (SameAirportException | IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
